@@ -11,6 +11,7 @@
 <script src="../libs/jquery.min.js"></script>
 <script src="../libs/jsPlumb.min.js"></script>
 <script src='../chart.js'></script>
+```
 
 ### 常用操作
 ```
