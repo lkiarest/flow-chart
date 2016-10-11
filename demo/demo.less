@@ -1,0 +1,114 @@
+@borderColor: #aaa;
+@btnColor: #2196f3;
+
+* {
+    margin: 0; padding: 0;
+}
+html, body {
+    height: 100%;
+}
+body {
+    display: flex;
+    font-family: Microsoft Yahei;
+    flex-direction: column;
+    min-height: 520px;
+}
+
+.flowchart-panel {
+    display: flex;
+    flex-grow: 1;
+
+    .left {
+        padding: 10px 0;
+        width: 200px;
+        background: #f0f1f9;
+        border-right: 1px solid @borderColor;
+
+        h3, input {
+            margin-left: 10px;
+        }
+
+        ul.nodes {
+            color: #333;
+            list-style: none;
+
+            li {
+                text-indent: 30px;
+                font-size: 14px;
+                padding: 8px 0;
+                margin: 8px 0;
+                list-style: none;
+
+                a {
+                    float: right;
+                    padding-right: 10px;
+                    text-decoration: none;
+                    display: none;
+                }
+
+                &:hover {
+                    background-color: #d8dcf0;
+
+                    a {
+                        display: inline;
+                    }
+                }
+            }
+        }
+    }
+    .middle {
+        flex-grow: 1;
+        position: relative;
+        margin: 0 10px;
+        padding: 10px;
+    }
+    .right {
+        width: 300px;
+        padding: 10px;
+        position: relative;
+        color: #555;
+        border-left: 1px solid @borderColor;
+        p {
+            margin: 10px 0;
+            font-size: 12px;
+        }
+        h4 {
+            margin: 20px 0;
+        }
+    }
+}
+
+._jsPlumb_connector,
+._jsPlumb_startpoint,
+._jsPlumb_endpoint,
+.endpointTargetLabel,
+.endpointSourceLabel {
+    cursor: pointer;
+}
+
+.btns {
+    background: #f0f1f9;
+    padding: 20px;
+    border-top: 1px solid #aaa;
+    button {
+        padding: 4px 16px;
+        background: @btnColor;
+        color: #fff;
+        border: none;
+        cursor: pointer;
+        outline: 0;
+
+        &:hover {
+            background: darken(@btnColor, 10%);
+        }
+        &:active {
+            background: darken(@btnColor, 20%);
+        }
+    }
+}
+
+#jsonOutput {
+    width: 99%;
+    height: 100px;
+    margin: 0 auto;
+}

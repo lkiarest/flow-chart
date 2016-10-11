@@ -1,0 +1,42 @@
+<!doctype html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>flowchart</title>
+    <link rel="stylesheet" type="text/css" href="../chart.css">
+    <script src="../libs/jquery.min.js"></script>
+    <script src="../libs/jsPlumb.min.js"></script>
+    <script src='../chart.js'></script>
+    <!-- 模拟测试数据 -->
+    <script src="../test/nodes.js"></script>
+    <link rel="stylesheet" href="demo.css">
+    <script src="./demo.js"></script>
+</head>
+
+<body>
+    <div class='flowchart-panel'>
+        <div class='left'>
+            <h3>对象库</h3>
+            <input type="text" name="keyword">
+            <ul class='nodes'>
+            </ul>
+        </div>
+        <div class='middle'>
+            <div id="demo-chart">
+                <!-- <div class="startpoint point window node" style="left: 150px; top:20px; background-color:green" data-nodetype="startpoint" id="startpoint">Start</div>
+                <div class="endpoint point window node" style="left: 150px; top:350px" data-nodetype="endpoint" id="endpoint">End</div> -->
+            </div>
+        </div>
+        <div class='right'>
+            <h3 class='proc-name'></h3>
+            <p class='proc-desc'></p>
+            <button class='btn-del'>删除</button>
+        </div>
+    </div>
+    <div class='btns'>
+        <button class='btn-save'>保存</button>
+    </div>
+    <textarea id="jsonOutput"></textarea>
+</body>
+
+</html>
