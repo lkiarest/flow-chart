@@ -1,6 +1,8 @@
 # flow-chart
 流程图工具
 
+Demo演示：[https://lkiarest.github.io/flow-chart/demo/demo.html](https://lkiarest.github.io/flow-chart/demo/demo.html)
+
 基于 jsplumb 封装一个使用十分简单的流程图处理类。
 
 样式使用less处理
