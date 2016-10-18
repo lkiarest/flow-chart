@@ -25,6 +25,10 @@
 
             &:hover {
                 border: 2px solid #2196f3;
+
+                .remove {
+                    display: block;
+                }
             }
 
             &.node-start {
@@ -37,6 +41,23 @@
 
             &.node-process {
                 background-color: #68b8f7;
+            }
+
+            .remove {
+                display: none;
+                &:before {
+                    content: 'x';
+                    right: -4px;
+                    top: -8px;
+                    width: 16px;
+                    height: 16px;
+                    line-height: 16px;
+                    text-align: center;
+                    border-radius: 8px;
+                    position: absolute;
+                    color: #fff;
+                    background: #333;
+                }
             }
         }
     }

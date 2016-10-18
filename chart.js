@@ -11,6 +11,7 @@
  * @param {Number} [options.radius] 节点圆角大小
  * @param {Number} [options.data] 绑定到节点的附加数据
  * @param {Number} [options.container] 节点容器（画布），若设置此选项则会自动将节点添加到画布上
+ * @param {Boolean} [options.removable=true] 是否支持删除功能（鼠标放上去显示关闭图标）
  */
 let ChartNode = function(id, name, x, y, options) {
     this._container = null;
@@ -21,7 +22,7 @@ let ChartNode = function(id, name, x, y, options) {
     this._data = options && options.data || {};
     this._data.nodeId = id;
     this._options = $.extend({ // 默认属性
-        // class: 'classname'
+        removable: true
     }, options);
     this._el = null;
 
@@ -79,7 +80,13 @@ ChartNode.prototype.appendTo = function(container) {
             top: px(self._y)
         })
         .text(self._name)
-        .data('node', this._data);
+        .data('node', this._data)
+        .data('__node', this);
+
+    if (options.removable) {
+        let removeIcon = $('<div>').addClass('remove');
+        node.append(removeIcon);
+    }
 
     container.append(node);
     jsPlumb.draggable(node, { grid: [10, 10] });
@@ -186,6 +193,20 @@ Chart.prototype.init = function(options) {
             options.onNodeClick.call(this, target.data('node'));
         });
     }
+    // 删除节点
+    this._container.on('click', '.remove', event => {
+        let delNode = $(event.target).parent().data('__node');
+        if (delNode) {
+            let data = delNode.getData();
+            delNode.dispose();
+
+            if (options && options.onNodeDel) {
+                options.onNodeDel.call(this, data);
+            }
+        }
+
+        event.stopPropagation();;
+    });
 };
 
 /**
@@ -242,6 +263,15 @@ Chart.prototype.toJson = function() {
         nodes: nodes,
         connections: connections
     };
+};
+
+Chart.prototype.dispose = function () {
+    this._container.off('click'); // unbind events
+    this._nodes.forEach(item => {
+        item.dispose();
+    });
+    this._nodes = [];
+    this._container = null;
 };
 
 Chart.ready = (callback) => {

@@ -17,16 +17,28 @@ Chart.ready(() => {
         infoPanel.find('.proc-desc').text(data.desc || '');
     };
 
+    let _hideNodeInfo = () => {
+        _showNodeInfo({
+            name: '',
+            desc: ''
+        });
+    };
+
     let chart = new Chart($('#demo-chart'), {
         onNodeClick (data) { // 点击节点时触发
             _showNodeInfo(data);
             _current = data.nodeId;
+        },
+        onNodeDel (data) {
+            console.log(data);
+            _hideNodeInfo();
         }
     });
 
     // 添加开始节点
     let nodeStart = chart.addNode('开始', basicX, startY, {
         class: 'node-start',
+        removable: false,
         data: {
             name: '开始',
             nodeType: 0
@@ -39,6 +51,7 @@ Chart.ready(() => {
     // 添加结束节点
     let nodeEnd = chart.addNode('结束', basicX, endY, {
         class: 'node-end',
+        removable: false,
         data: {
             name: '结束',
             nodeType: 0
@@ -77,13 +90,13 @@ Chart.ready(() => {
             $('#jsonOutput').val(JSON.stringify(chart.toJson()));
         });
 
-        $(".btn-del").click(() => {
-            if (!_current) {
-                return;
-            }
+        // $(".btn-del").click(() => {
+        //     if (!_current) {
+        //         return;
+        //     }
 
-            chart.removeNode(_current);
-        });
+        //     chart.removeNode(_current);
+        // });
     };
 
     bindEvent();

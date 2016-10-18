@@ -25,6 +25,9 @@
 .flow-chart-canvas-lkiarest .window.task:hover {
   border: 2px solid #2196f3;
 }
+.flow-chart-canvas-lkiarest .window.task:hover .remove {
+  display: block;
+}
 .flow-chart-canvas-lkiarest .window.task.node-start {
   background-color: #ffb952;
 }
@@ -33,6 +36,22 @@
 }
 .flow-chart-canvas-lkiarest .window.task.node-process {
   background-color: #68b8f7;
+}
+.flow-chart-canvas-lkiarest .window.task .remove {
+  display: none;
+}
+.flow-chart-canvas-lkiarest .window.task .remove:before {
+  content: 'x';
+  right: -4px;
+  top: -8px;
+  width: 16px;
+  height: 16px;
+  line-height: 16px;
+  text-align: center;
+  border-radius: 8px;
+  position: absolute;
+  color: #fff;
+  background: #333;
 }
 .jsplumb-overlay.endpoint-label-lkiarest {
   font-size: 12px;
