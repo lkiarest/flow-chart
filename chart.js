@@ -19,6 +19,7 @@ let ChartNode = function(id, name, x, y, options) {
     this._name = name;
     this._x = x;
     this._y = y;
+    this._clsName = options.class || '';
     this._data = options && options.data || {};
     this._data.nodeId = id;
     this._options = $.extend({ // 默认属性
@@ -69,11 +70,10 @@ ChartNode.prototype.appendTo = function(container) {
 
     let self = this;
     let options = self._options;
-    let className = options.class || '';
     let px = self._px;
 
     // 创建并插入 dom 节点
-    let node = $('<div>').addClass(`window task ${className}`)
+    let node = $('<div>').addClass(`window task ${self._clsName}`)
         .attr('id', self._id)
         .css({
             left: px(self._x),
@@ -128,7 +128,8 @@ ChartNode.prototype.addPort = function(options) {
                 label: options.label || '',
                 cssClass: "endpoint-label-lkiarest"
             }]
-        ]
+        ],
+        allowLoopback:false
     };
 
     jsPlumb.addEndpoint(this._el, endpointConf);
@@ -143,10 +144,32 @@ ChartNode.prototype.updatePos = function() {
     this._y = parseInt(el.css("top"), 10);
 };
 
+ChartNode.prototype.getPos = function() {
+    return {
+        x: this._x,
+        y: this._y
+    };
+};
+
+ChartNode.prototype.toPlainObj = function() {
+    let item = this;
+    item.updatePos();
+
+    let data = $.extend({}, item._data);
+    data.nodeId = item._id;
+    data.positionX = item._x;
+    data.positionY = item._y;
+    data.className = item._clsName;
+    data.removable = item._options.removable;
+
+    return data;
+};
+
 ChartNode.prototype.dispose = function() {
     let el = this._el;
-    jsPlumb.detachAllConnections(el);
-    jsPlumb.removeAllEndpoints(el);
+    let domEl = el.get(0);
+    jsPlumb.detachAllConnections(domEl);
+    jsPlumb.remove(domEl);
     el.remove();
 };
 
@@ -163,7 +186,7 @@ let Chart = function(container, options) {
 };
 
 Chart.prototype.nodeId = function() {
-    return this._seedName + (this._seedId++);
+    return this._seedName + (this._seedId++) + (new Date).valueOf();
 };
 
 /**
@@ -173,7 +196,7 @@ Chart.prototype.nodeId = function() {
  */
 Chart.prototype.init = function(options) {
     jsPlumb.importDefaults({
-        DragOptions: { cursor: 'pointer', zIndex: 2000 },
+        // DragOptions: { cursor: 'pointer', zIndex: 2000 },
         ConnectionOverlays: [
             ["PlainArrow", {
                 width: 10,
@@ -181,7 +204,19 @@ Chart.prototype.init = function(options) {
                 id: "arrow",
                 length: 8
             }]
-        ]
+        ],
+        DragOptions : { cursor: 'pointer', zIndex:2000 },
+        EndpointStyles : [{ fillStyle:'#225588' }, { fillStyle:'#558822' }],
+        Endpoints : [ [ "Dot", { radius:2 } ], [ "Dot", { radius: 2 } ]],
+        Connector:[ "Flowchart", { stub:[15, 25], gap:0, cornerRadius:5, alwaysRespectStubs:true } ],
+        // ConnectionOverlays : [
+        //     [ "Arrow", { 
+        //         location:1,
+        //         id:"arrow",
+        //         length:20,
+        //         foldback:0.4
+        //     } ]
+        // ]
     });
 
     this._container.addClass('flow-chart-canvas-lkiarest');
@@ -198,14 +233,17 @@ Chart.prototype.init = function(options) {
         let delNode = $(event.target).parent().data('__node');
         if (delNode) {
             let data = delNode.getData();
+            let nodeId = delNode.getId();
             delNode.dispose();
+
+            this.removeNode(nodeId);
 
             if (options && options.onNodeDel) {
                 options.onNodeDel.call(this, data);
             }
         }
 
-        event.stopPropagation();;
+        event.stopPropagation();
     });
 };
 
@@ -241,13 +279,14 @@ Chart.prototype.getNodes = function() {
     return this._nodes;
 };
 
+/**
+ * 序列化以保存
+ */
 Chart.prototype.toJson = function() {
     // 获取所有节点
     let nodes = [];
     this._nodes.forEach(item => {
-        let data = item.getData();
-        data.nodeId = item.getId();
-        nodes.push(data);
+        nodes.push(item.toPlainObj());
     });
 
     // 获取所有连接
@@ -265,15 +304,105 @@ Chart.prototype.toJson = function() {
     };
 };
 
-Chart.prototype.dispose = function () {
-    this._container.off('click'); // unbind events
-    this._nodes.forEach(item => {
+/**
+ * 反序列化保存的数据并绘制流程图
+ */
+Chart.prototype.fromJson = function(jsonStr) {
+    if (!jsonStr || jsonStr === '') {
+        console.error('draw from json failed: empty json string');
+        reutrn;
+    }
+
+    let jsonObj = null;
+
+    try {
+        jsonObj = JSON.parse(jsonStr);
+    } catch (e) {
+        console.error('invalid json string', e);
+        return;
+    }
+
+    this.clear();
+
+    let nodes = jsonObj.nodes;
+    let connections = jsonObj.connections;
+
+    nodes && nodes.forEach(item => {
+        let node = this.addNode(item.name, item.positionX, item.positionY, {
+            class: item.className,
+            removable: item.removable,
+            id: item.nodeId,
+            data: item
+        });
+
+        switch(item.className) {
+            case 'node-start': {
+                node.addPort({
+                    isSource: true
+                });
+                break;
+            }
+            case 'node-end': {
+                node.addPort({
+                    isTarget: true,
+                    position: 'Top'
+                });
+                break;
+            }
+            default: {
+                node.addPort({
+                    isSource: true
+                });
+
+                node.addPort({
+                    isTarget: true,
+                    position: 'Top'
+                });
+            }
+        }
+
+        jsPlumb.repaint(node.getId());
+    });
+
+    connections && connections.forEach(item => {
+        jsPlumb.connect({
+            source: item.pageSourceId,
+            target: item.pageTargetId,
+            deleteEndpointsOnDetach:false,
+            paintStyle: ChartNode.lineStyle,
+            anchors: ["Bottom", [0.5, 0, 0, -1]]
+        });
+    });
+
+    jsPlumb.repaintEverything();
+};
+
+/**
+ * 清除画布中的元素
+ */
+Chart.prototype.clear = function() {
+    this._nodes && this._nodes.forEach(item => {
         item.dispose();
     });
+
     this._nodes = [];
+    jsPlumb.detachAllConnections(this._container);
+    jsPlumb.removeAllEndpoints(this._container);
+};
+
+/**
+ * 销毁释放
+ */
+Chart.prototype.dispose = function () {
+    this.clear();
+    this._container.off('click'); // unbind events
     this._container = null;
 };
 
 Chart.ready = (callback) => {
     jsPlumb.ready(callback);
 };
+
+if (typeof module === 'object' && module && typeof module.exports === 'object') {
+    module.exports = Chart;
+}

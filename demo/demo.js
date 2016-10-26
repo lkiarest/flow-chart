@@ -36,31 +36,31 @@ Chart.ready(() => {
     });
 
     // 添加开始节点
-    let nodeStart = chart.addNode('开始', basicX, startY, {
-        class: 'node-start',
-        removable: false,
-        data: {
-            name: '开始',
-            nodeType: 0
-        }
-    });
-    nodeStart.addPort({
-        isSource: true
-    });
+    // let nodeStart = chart.addNode('开始', basicX, startY, {
+    //     class: 'node-start',
+    //     removable: false,
+    //     data: {
+    //         name: '开始',
+    //         nodeType: 0
+    //     }
+    // });
+    // nodeStart.addPort({
+    //     isSource: true
+    // });
 
     // 添加结束节点
-    let nodeEnd = chart.addNode('结束', basicX, endY, {
-        class: 'node-end',
-        removable: false,
-        data: {
-            name: '结束',
-            nodeType: 0
-        }
-    });
-    nodeEnd.addPort({
-        isTarget: true,
-        position: 'Top'
-    });
+    // let nodeEnd = chart.addNode('结束', basicX, endY, {
+    //     class: 'node-end',
+    //     removable: false,
+    //     data: {
+    //         name: '结束',
+    //         nodeType: 0
+    //     }
+    // });
+    // nodeEnd.addPort({
+    //     isTarget: true,
+    //     position: 'Top'
+    // });
 
     const addNewTask = (name, params) => {
         params = params || {};
@@ -88,6 +88,14 @@ Chart.ready(() => {
 
         $(".btn-save").click(() => {
             $('#jsonOutput').val(JSON.stringify(chart.toJson()));
+        });
+
+        $(".btn-load").click(() => {
+            chart.fromJson($('#jsonOutput').val());
+        });
+
+        $(".btn-clear").click(() => {
+            chart.clear();
         });
 
         // $(".btn-del").click(() => {
