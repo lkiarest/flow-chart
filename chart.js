@@ -119,6 +119,7 @@ ChartNode.prototype.addPort = function(options) {
         maxConnections: -1,
         connector: ["Flowchart", { stub: [15, 15], gap: 0, cornerRadius: 5, alwaysRespectStubs: true }],
         connectorStyle: ChartNode.lineStyle,
+        // connectorOverlays: [[ "Arrow", {location: 1}]],
         // hoverPaintStyle: endpointHoverStyle,
         // connectorHoverStyle: connectorHoverStyle,
         dragOptions: {},
@@ -196,7 +197,8 @@ Chart.prototype.nodeId = function() {
  * @param {Function} [options.onNodeClick] 节点点击事件回调函数，参数为节点绑定的数据
  */
 Chart.prototype.init = function(options) {
-    this._jsPlumb.importDefaults({
+    this._jsPlumb = jsPlumb.getInstance();
+    jsPlumb.importDefaults({
         // DragOptions: { cursor: 'pointer', zIndex: 2000 },
         ConnectionOverlays: [
             ["PlainArrow", {
@@ -401,7 +403,7 @@ Chart.prototype.dispose = function () {
 };
 
 Chart.ready = (callback) => {
-    this._jsPlumb.ready(callback);
+    jsPlumb.ready(callback);
 };
 
 if (typeof module === 'object' && module && typeof module.exports === 'object') {
