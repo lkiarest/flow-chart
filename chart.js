@@ -14,6 +14,7 @@
  * @param {Boolean} [options.removable=true] 是否支持删除功能（鼠标放上去显示关闭图标）
  */
 let ChartNode = function(id, name, x, y, options) {
+    this._jsPlumb = null;
     this._container = null;
     this._id = id;
     this._name = name;
@@ -48,6 +49,10 @@ ChartNode.lineStyle = {
 ChartNode.labelPos = {
     'Bottom': [6, 2.5],
     'Top': [6, -2.5],
+};
+
+ChartNode.prototype.setPlumb = function (plumb) {
+    this._jsPlumb = plumb;
 };
 
 ChartNode.prototype._px = (value) => {
@@ -89,7 +94,7 @@ ChartNode.prototype.appendTo = function(container) {
     }
 
     container.append(node);
-    jsPlumb.draggable(node, { grid: [10, 10] });
+    this._jsPlumb.draggable(node, { grid: [10, 10] });
 
     this._el = node;
 };
@@ -133,7 +138,7 @@ ChartNode.prototype.addPort = function(options) {
         allowLoopback:false
     };
 
-    jsPlumb.addEndpoint(this._el, endpointConf);
+    this._jsPlumb.addEndpoint(this._el, endpointConf);
 };
 
 /**
@@ -169,8 +174,8 @@ ChartNode.prototype.toPlainObj = function() {
 ChartNode.prototype.dispose = function() {
     let el = this._el;
     let domEl = el.get(0);
-    jsPlumb.detachAllConnections(domEl);
-    jsPlumb.remove(domEl);
+    this._jsPlumb.detachAllConnections(domEl);
+    this._jsPlumb.remove(domEl);
     el.remove();
 };
 
@@ -198,7 +203,7 @@ Chart.prototype.nodeId = function() {
  */
 Chart.prototype.init = function(options) {
     this._jsPlumb = jsPlumb.getInstance();
-    jsPlumb.importDefaults({
+    this._jsPlumb.importDefaults({
         // DragOptions: { cursor: 'pointer', zIndex: 2000 },
         ConnectionOverlays: [
             ["PlainArrow", {
@@ -261,6 +266,7 @@ Chart.prototype.init = function(options) {
 Chart.prototype.addNode = function(name, x, y, options) {
     let id = options && options.id || this.nodeId();
     let node = new ChartNode(id, name, x, y, options);
+    node.setPlumb(this._jsPlumb);
     node.appendTo(this._container);
     this._nodes.push(node);
     return node;
