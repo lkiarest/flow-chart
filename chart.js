@@ -177,6 +177,7 @@ ChartNode.prototype.dispose = function() {
  * @class 画布
  */
 let Chart = function(container, options) {
+    this._jsPlumb = null; // 多实例支持！
     this._container = container;
     this._nodes = [];
     this._seedName = 'flow-chart-node';
@@ -195,7 +196,7 @@ Chart.prototype.nodeId = function() {
  * @param {Function} [options.onNodeClick] 节点点击事件回调函数，参数为节点绑定的数据
  */
 Chart.prototype.init = function(options) {
-    jsPlumb.importDefaults({
+    this._jsPlumb.importDefaults({
         // DragOptions: { cursor: 'pointer', zIndex: 2000 },
         ConnectionOverlays: [
             ["PlainArrow", {
@@ -290,7 +291,7 @@ Chart.prototype.toJson = function() {
     });
 
     // 获取所有连接
-    let connections = jsPlumb.getConnections().map(connection => {
+    let connections = this._jsPlumb.getConnections().map(connection => {
         return {
             connectionId: connection.id,
             pageSourceId: connection.sourceId,
@@ -361,11 +362,11 @@ Chart.prototype.fromJson = function(jsonStr) {
             }
         }
 
-        jsPlumb.repaint(node.getId());
+        this._jsPlumb.repaint(node.getId());
     });
 
     connections && connections.forEach(item => {
-        jsPlumb.connect({
+        this._jsPlumb.connect({
             source: item.pageSourceId,
             target: item.pageTargetId,
             deleteEndpointsOnDetach:false,
@@ -374,7 +375,7 @@ Chart.prototype.fromJson = function(jsonStr) {
         });
     });
 
-    jsPlumb.repaintEverything();
+    this._jsPlumb.repaintEverything();
 };
 
 /**
@@ -386,8 +387,8 @@ Chart.prototype.clear = function() {
     });
 
     this._nodes = [];
-    jsPlumb.detachAllConnections(this._container);
-    jsPlumb.removeAllEndpoints(this._container);
+    this._jsPlumb.detachAllConnections(this._container);
+    this._jsPlumb.removeAllEndpoints(this._container);
 };
 
 /**
@@ -400,7 +401,7 @@ Chart.prototype.dispose = function () {
 };
 
 Chart.ready = (callback) => {
-    jsPlumb.ready(callback);
+    this._jsPlumb.ready(callback);
 };
 
 if (typeof module === 'object' && module && typeof module.exports === 'object') {

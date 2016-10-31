@@ -24,43 +24,47 @@ Chart.ready(() => {
         });
     };
 
-    let chart = new Chart($('#demo-chart'), {
-        onNodeClick (data) { // 点击节点时触发
-            _showNodeInfo(data);
-            _current = data.nodeId;
-        },
-        onNodeDel (data) {
-            console.log(data);
-            _hideNodeInfo();
+    let _createChart = function() {
+        return new Chart($('#demo-chart'), {
+            onNodeClick (data) { // 点击节点时触发
+                _showNodeInfo(data);
+                _current = data.nodeId;
+            },
+            onNodeDel (data) {
+                console.log(data);
+                _hideNodeInfo();
+            }
+        })
+    };
+
+    let chart = _createChart();
+
+    //添加开始节点
+    let nodeStart = chart.addNode('开始', basicX, startY, {
+        class: 'node-start',
+        removable: false,
+        data: {
+            name: '开始',
+            nodeType: 0
         }
     });
+    nodeStart.addPort({
+        isSource: true
+    });
 
-    // 添加开始节点
-    // let nodeStart = chart.addNode('开始', basicX, startY, {
-    //     class: 'node-start',
-    //     removable: false,
-    //     data: {
-    //         name: '开始',
-    //         nodeType: 0
-    //     }
-    // });
-    // nodeStart.addPort({
-    //     isSource: true
-    // });
-
-    // 添加结束节点
-    // let nodeEnd = chart.addNode('结束', basicX, endY, {
-    //     class: 'node-end',
-    //     removable: false,
-    //     data: {
-    //         name: '结束',
-    //         nodeType: 0
-    //     }
-    // });
-    // nodeEnd.addPort({
-    //     isTarget: true,
-    //     position: 'Top'
-    // });
+    //添加结束节点
+    let nodeEnd = chart.addNode('结束', basicX, endY, {
+        class: 'node-end',
+        removable: false,
+        data: {
+            name: '结束',
+            nodeType: 0
+        }
+    });
+    nodeEnd.addPort({
+        isTarget: true,
+        position: 'Top'
+    });
 
     const addNewTask = (name, params) => {
         params = params || {};
@@ -91,10 +95,15 @@ Chart.ready(() => {
         });
 
         $(".btn-load").click(() => {
+            if ($('#demo-chart').length === 0) {
+                $('<div id="demo-chart"></div>').appendTo($('.middle'));
+                chart = _createChart();
+            }
             chart.fromJson($('#jsonOutput').val());
         });
 
         $(".btn-clear").click(() => {
+            $('#demo-chart').remove();
             chart.clear();
         });
 
